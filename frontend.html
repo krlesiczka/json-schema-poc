@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>JSON Schema proof of concept</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.0/ajv.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.0/ajv.min.js"></script>
+</head>
+<body>
+<form action="backend.php">
+    <label for="number">Number: <input id="number" type="text" onkeyup="validateProperty('number')"/></label><br/>
+    <label for="name">Name: <input id="name" type="text" onkeyup="validateProperty('name')"/></label><br/>
+    <label for="type">Type: <select id="type">
+        <option>asset</option>
+        <option>liability</option>
+        <option>income</option>
+        <option>expense</option>
+        <option>complete</option>
+    </select></label><br/>
+    <label for="is_active">Active: <input id="is_active" type="checkbox"/></label><br/>
+    <label for="is_vat_subject">Vat subject: <input id="is_vat_subject" type="checkbox"/></label><br/>
+    <label for="vat_id">VAT: <input id="vat_id" type="text"/></label><br/>
+    <input type="button" value=" Submit " onclick="validateAndSend()"/>
+</form>
+<div>
+    Output:
+    <pre id="response"></pre>
+</div>
+<script>
+
+    const validator = new Ajv();
+    let fullSchema;
+
+    fetch('object-validation.json')
+        .then(response => response.json())
+        .then(schema => { fullSchema = schema; });
+
+    const validateProperty = (propertyName) => {
+        const isValid = validator.validate(fullSchema.properties[propertyName], document.getElementById(propertyName).value);
+        document.getElementById("response").innerHTML = isValid ? " " : JSON.stringify(validator.errors, undefined, 2);
+    };
+
+    function validateAndSend() {
+        const dataToSend = {
+            number: document.getElementById("number").value,
+            name: document.getElementById("name").value,
+            type: document.getElementById("type").value,
+            is_active: document.getElementById("is_active").checked,
+            is_vat_subject: document.getElementById("is_vat_subject").checked,
+            vat_id: parseInt(document.getElementById("vat_id").value) || null
+        };
+
+        let isValid = validator.validate(fullSchema, dataToSend);
+        //isValid = true; // to test backend validation
+        if (isValid) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = () => { document.getElementById("response").innerHTML = xhttp.responseText; };
+            xhttp.open("POST", "backend.php", true);
+            xhttp.setRequestHeader("Content-type", "text/json");
+            xhttp.send(JSON.stringify(dataToSend));
+        } else {
+            document.getElementById("response").innerHTML = JSON.stringify(validator.errors, undefined, 2);
+        }
+    }
+
+</script>
+</body>
+</html>

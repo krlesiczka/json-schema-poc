@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "required": [
+    "number",
+    "name",
+    "type",
+    "is_active",
+    "is_vat_subject",
+    "vat_id"
+  ],
+  "properties": {
+    "number": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 16,
+      "pattern": "^[0-9a-zA-Z.-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[0-9a-zA-ZäöüßÄÖÜàâçéèêëîïôûùüÿñæœÀÂÇÉÈÊËÎÏÔÛÙÜŸÑÆŒàèéìòóùÀÈÉÌÒÓÙ,. :-]+$"
+    },
+    "type": {
+      "type": "string",
+      "examples": ["asset"],
+      "enum": ["asset","liability","income","expense","complete"]
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_vat_subject": {
+      "type": "boolean",
+      "default": true
+    },
+    "vat_id": {
+      "type": ["number", "null"],
+      "minimum": 1
+    }
+  }
+}
